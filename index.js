@@ -13,7 +13,7 @@ function Findme(user, pass) {
   EventEmitter.call(this);
 
   // Store credentials
-  this.auth = {
+  this.login = {
     apple_id: user,
     password: pass,
     extended_login: true
@@ -124,7 +124,7 @@ Findme.prototype.find = function () {
 
     // Login details
     var options = {
-      data: JSON.stringify(this.auth),
+      data: JSON.stringify(this.login),
       path: '/setup/ws/1/login',
       hostname: 'setup.icloud.com'
     };
