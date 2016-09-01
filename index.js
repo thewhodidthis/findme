@@ -18,11 +18,6 @@ function Findme(user, pass) {
     password: pass,
     extended_login: true
   };
-
-  // Store session data
-  this.cookie = '';
-  this.findmeUrl = '';
-  this.expiresOn = '';
 }
 
 util.inherits(Findme, EventEmitter);
@@ -68,7 +63,7 @@ Findme.prototype.sendRequest = function (options, callback) {
           _this.expiresOn = new Date(entry.match(/Expires=(.*GMT+);/)[1]);
         }
 
-        // Kepp the part up to the first semicolon
+        // Keep the part up to the first semicolon
         entry = entry.substr(0, entry.indexOf(';'));
 
         // If this is the last entry skip the semicolon
@@ -96,7 +91,7 @@ Findme.prototype.sendRequest = function (options, callback) {
 
     response.on('error', function _onResponseError(error) {
 
-      // Send response errors
+      // Alert response errors
       _this.emit('error', new Error('Response error: ' + error.message));
     });
   }).end(data);
@@ -104,22 +99,20 @@ Findme.prototype.sendRequest = function (options, callback) {
 
 Findme.prototype.makeServiceCall = function () {
 
-  // This'll fail if cookie or findmeUrl haven't been set after login succesful
+  // Can only procced after login succesful, ie. cookie and service url have beed set
   var options = {
     data: '',
     path: '/fmipservice/client/web/initClient',
     headers: {
       Cookie: this.cookie
     },
-
-    // Cleanup the findme webservice url
     hostname: this.findmeUrl
   };
 
-  // Get device info
-  this.sendRequest(options, function _onFetchSuccessful(data) {
+  // Send for device info
+  this.sendRequest(options, function _onCallSuccessful(data) {
 
-    // Send all of device data
+    // Alert all of device data
     this.emit('data', data.content);
   }.bind(this));
 };
@@ -129,18 +122,19 @@ Findme.prototype.find = function () {
     this.makeServiceCall();
   } else {
 
-    // Login
+    // Login details
     var options = {
       data: JSON.stringify(this.auth),
       path: '/setup/ws/1/login',
       hostname: 'setup.icloud.com'
     };
 
-    // To be safe, reset these if login required
+    // Store session data
     this.cookie = '';
     this.expiresOn = '';
     this.findmeUrl = '';
 
+    // Login
     this.sendRequest(options, function _onLoginSuccessful(data) {
 
       // Assuming data contains all those keys, break if findme webservice disabled
@@ -148,6 +142,7 @@ Findme.prototype.find = function () {
         return;
       }
 
+      // Cleanup the findme webservice url
       this.findmeUrl = data.webservices.findme.url.replace(':443', '').replace('https://', '');
       this.makeServiceCall();
     }.bind(this));
