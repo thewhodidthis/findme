@@ -10,7 +10,6 @@ npm install thewhodidthis/findme --save
 
 ### Usage
 ```js
-var util = require('util');
 var Config = require('./config');
 var Sosumi = require('@thewhodidthis/findme');
 
