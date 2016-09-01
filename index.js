@@ -141,7 +141,7 @@ Findme.prototype.find = function () {
     this.expiresOn = '';
     this.findmeUrl = '';
 
-    this.sendRequest(options, function _onloginSuccessful(data) {
+    this.sendRequest(options, function _onLoginSuccessful(data) {
 
       // Assuming data contains all those keys, break if findme webservice disabled
       if (data.webservices.findme.status !== 'active') {
