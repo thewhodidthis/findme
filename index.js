@@ -25,21 +25,13 @@ function Findme(user, pass) {
 
 util.inherits(Findme, EventEmitter);
 
-Findme.prototype.sendRequest = function (options, callback) {
-  var data = options.data || this.request.data;
-  var headers = Object.assign(this.request.headers, options.headers);
-  var hostname = options.hostname || this.request.hostname;
-  var method = options.method || this.request.method;
-  var path = options.path || this.request.path;
+Findme.prototype.sendRequest = function (data, options, callback) {
+  options = Object.assign({}, this.request, options);
 
-  headers['Content-Length'] = Buffer.byteLength(data);
+  options.headers = Object.assign({}, this.request.headers, options.headers);
+  options.headers['Content-Length'] = Buffer.byteLength(data);
 
-  https.request({
-    headers: headers,
-    hostname: hostname,
-    method: method,
-    path: path
-  }).on('error', function _onRequestError(error) {
+  https.request(options).on('error', function _onRequestError(error) {
 
     // Request unsuccesful
     return callback(error, null, null);
@@ -70,7 +62,6 @@ Findme.prototype.sendRequest = function (options, callback) {
 
 Findme.prototype.makeServiceCall = function () {
   var options = {
-    data: '',
     headers: {
       Cookie: this.cookie.content
     },
@@ -79,13 +70,13 @@ Findme.prototype.makeServiceCall = function () {
   };
 
   // Send for device info
-  this.sendRequest(options, function _onCallSuccessful(error, response, data) {
+  this.sendRequest('', options, function _onCallSuccessful(error, response, body) {
     if (error) {
       return this.emit('error', error);
     }
 
     // Alert all of device data
-    this.emit('data', data.content);
+    this.emit('data', body.content);
   }.bind(this));
 };
 
@@ -96,22 +87,21 @@ Findme.prototype.find = function () {
     this.makeServiceCall();
   } else {
 
-    // Setup for logging in
+    var data = JSON.stringify(this.login);
     var options = {
-      data: JSON.stringify(this.login),
       hostname: 'setup.icloud.com',
       path: '/setup/ws/1/login'
     };
 
     // Do login
     // TODO: Lotsa binding going on
-    this.sendRequest(options, function _onLoginSuccessful(error, response, data) {
+    this.sendRequest(data, options, function _onLoginSuccessful(error, response, body) {
       if (error) {
         return this.emit('error', error);
       }
 
       // Break if findme webservice disabled
-      if (data.webservices.findme.status !== 'active') {
+      if (body.webservices.findme.status !== 'active') {
         return this.emit('error', new Error('findme service disabled'));
       }
 
@@ -137,7 +127,7 @@ Findme.prototype.find = function () {
       }
 
       // Cleanup webservice url
-      this.request.hostname = data.webservices.findme.url.replace(':443', '').replace('https://', '');
+      this.request.hostname = body.webservices.findme.url.replace(':443', '').replace('https://', '');
 
       this.makeServiceCall();
     }.bind(this));
@@ -152,7 +142,6 @@ Findme.defaults = {
   },
   cookie: {},
   request: {
-    data: '',
     headers: {
       Origin: 'https://www.icloud.com',
       'Content-Type': 'application/json; charset=utf-8'
