@@ -1,4 +1,3 @@
-var util = require('util');
 var Config = require('../config');
 var Findme = require('../index.js');
 
@@ -18,4 +17,5 @@ findme.on('data', function _onData(data) {
 
 findme.on('error', function _onError(error) {
   console.error(error);
+  process.exit(1);
 });
