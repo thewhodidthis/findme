@@ -16,6 +16,9 @@
   "bugs": {
     "url": "https://github.com/thewhodidthis/findme/issues"
   },
+  "directories": {
+    "example": "example"
+  },
   "config": {
     "jscsrc": ".jscsrc"
   },
