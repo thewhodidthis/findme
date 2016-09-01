@@ -1,9 +1,9 @@
 'use strict';
 
-// Use the inherits method instead of Object.create()
+// For setting up inheritance
 var util = require('util');
 
-// For handling api interaction
+// For handling icloud api interaction
 var https = require('https');
 
 // Inherits from
@@ -12,68 +12,37 @@ var EventEmitter = require('events').EventEmitter;
 function Findme(user, pass) {
   EventEmitter.call(this);
 
+  // Store settings
+  // TODO: add key, cert options for https
+  for (var key in Findme.defaults) {
+    this[key] = Findme.defaults[key];
+  }
+
   // Store credentials
-  this.login = {
-    apple_id: user,
-    password: pass,
-    extended_login: true
-  };
+  this.login.apple_id = user;
+  this.login.password = pass;
 }
 
 util.inherits(Findme, EventEmitter);
 
 Findme.prototype.sendRequest = function (options, callback) {
-  var _this = this;
-
-  var data = options.data;
-  var path = options.path;
-  var hostname = options.hostname;
-
-  var headers = {
-    Origin: 'https://www.icloud.com',
-    'Content-Type': 'application/json; charset=utf-8',
-    'Content-Length': Buffer.byteLength(data)
-  };
-
-  if (options.headers) {
-    headers = Object.assign(headers, options.headers);
-  }
+  var data = options.data || this.request.data;
+  var headers = Object.assign(this.request.headers, options.headers);
+  var hostname = options.hostname || this.request.hostname;
+  var method = options.method || this.request.method;
+  var path = options.path || this.request.path;
 
   https.request({
-    path: path,
-    method: 'POST',
     headers: headers,
-    hostname: hostname
+    hostname: hostname,
+    method: method,
+    path: path
   }).on('error', function _onRequestError(error) {
 
-    // Send request errors
-    _this.emit('error', new Error('Request error: ' + error.message));
+    // Request unsuccesful
+    return callback(error, null, null);
   }).on('response', function _onResponse(response) {
     var body = [];
-    var cookies = response.headers['set-cookie'];
-
-    if (cookies && _this.cookie === '') {
-
-      // Cleanup the cookie array returned after logging in
-      // There's probably better ways of doing this
-      cookies.forEach(function _forEachCookieEntry(entry, idx) {
-
-        // Set the exapiry date based on this cookie entry
-        if (entry.includes('X-APPLE-WEBAUTH-USER')) {
-          _this.expiresOn = new Date(entry.match(/Expires=(.*GMT+);/)[1]);
-        }
-
-        // Keep the part up to the first semicolon
-        entry = entry.substr(0, entry.indexOf(';'));
-
-        // If this is the last entry skip the semicolon
-        if (idx < cookies.length - 1) {
-          entry += '; ';
-        }
-
-        _this.cookie += entry;
-      });
-    }
 
     if (response.statusCode === 200) {
       response.on('data', function _onData(chunk) {
@@ -81,36 +50,37 @@ Findme.prototype.sendRequest = function (options, callback) {
       });
 
       response.on('end', function _onEnd() {
-        callback(JSON.parse(Buffer.concat(body)));
+        return callback(null, response, JSON.parse(Buffer.concat(body)));
       });
     } else {
 
-      // Request unsuccesful
-      _this.emit('error', new Error('Response error: ' + response.statusCode));
+      // Response unsuccesful
+      return callback(new Error('status code ' + response.statusCode), response, null);
     }
 
     response.on('error', function _onResponseError(error) {
 
-      // Alert response errors
-      _this.emit('error', new Error('Response error: ' + error.message));
+      // Response errors
+      return callback(error, response, null);
     });
   }).end(data);
 };
 
 Findme.prototype.makeServiceCall = function () {
-
-  // Can only procced after login succesful, ie. cookie and service url have beed set
   var options = {
     data: '',
-    path: '/fmipservice/client/web/initClient',
     headers: {
-      Cookie: this.cookie
+      Cookie: this.cookie.content
     },
-    hostname: this.findmeUrl
+    hostname: this.request.hostname,
+    path: '/fmipservice/client/web/initClient'
   };
 
   // Send for device info
-  this.sendRequest(options, function _onCallSuccessful(data) {
+  this.sendRequest(options, function _onCallSuccessful(error, response, data) {
+    if (error) {
+      return this.emit('error', error);
+    }
 
     // Alert all of device data
     this.emit('data', data.content);
@@ -118,34 +88,74 @@ Findme.prototype.makeServiceCall = function () {
 };
 
 Findme.prototype.find = function () {
-  if (this.findmeUrl && this.cookie && this.expiresOn && this.expiresOn > new Date()) {
+
+  // Make the call if session available
+  if (this.cookie && this.cookie.expires && this.cookie.expires > new Date()) {
     this.makeServiceCall();
   } else {
 
     // Setup for logging in
     var options = {
       data: JSON.stringify(this.login),
-      path: '/setup/ws/1/login',
-      hostname: 'setup.icloud.com'
+      hostname: 'setup.icloud.com',
+      path: '/setup/ws/1/login'
     };
 
-    // Store session data
-    this.cookie = '';
-    this.expiresOn = '';
-    this.findmeUrl = '';
-
-    // Login
-    this.sendRequest(options, function _onLoginSuccessful(data) {
-
-      // Assuming data contains all those keys, break if findme webservice disabled
-      if (data.webservices.findme.status !== 'active') {
-        return;
+    // Do login
+    // TODO: Lotsa binding going on
+    this.sendRequest(options, function _onLoginSuccessful(error, response, data) {
+      if (error) {
+        return this.emit('error', error);
       }
 
-      // Cleanup the findme webservice url
-      this.findmeUrl = data.webservices.findme.url.replace(':443', '').replace('https://', '');
+      // Break if findme webservice disabled
+      if (data.webservices.findme.status !== 'active') {
+        return this.emit('error', new Error('findme service disabled'));
+      }
+
+      // I think it's safe to assume the headers key is part of the response
+      if (response.headers.hasOwnProperty('set-cookie') && Object.keys(this.cookie).length === 0) {
+        var cookieArray = response.headers['set-cookie'];
+
+        // Cleanup the cookie array returned after logging in
+        this.cookie.content = cookieArray.map(function _forEachEntry(entry, idx) {
+
+          // Set the expiry date based on this cookie entry
+          if (entry.includes('X-APPLE-WEBAUTH-USER')) {
+            this.cookie.expires = new Date(entry.match(/Expires=(.*GMT+);/)[1]);
+          }
+
+          // Keep the part up to the first semicolon
+          return entry.substr(0, entry.indexOf(';'));
+        }.bind(this)).join('; ');
+      } else {
+
+        // Reset the cookie store
+        this.cookie = {};
+      }
+
+      // Cleanup webservice url
+      this.request.hostname = data.webservices.findme.url.replace(':443', '').replace('https://', '');
+
       this.makeServiceCall();
     }.bind(this));
+  }
+};
+
+Findme.defaults = {
+  login: {
+    apple_id: '',
+    password: '',
+    extended_login: true
+  },
+  cookie: {},
+  request: {
+    data: '',
+    headers: {
+      Origin: 'https://www.icloud.com',
+      'Content-Type': 'application/json; charset=utf-8'
+    },
+    method: 'POST'
   }
 };
 
