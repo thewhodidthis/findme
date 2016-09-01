@@ -61,6 +61,7 @@ Findme.prototype.sendRequest = function (data, options, callback) {
 };
 
 Findme.prototype.makeServiceCall = function () {
+  var data = '';
   var options = {
     headers: {
       Cookie: this.cookie.content
@@ -70,7 +71,7 @@ Findme.prototype.makeServiceCall = function () {
   };
 
   // Send for device info
-  this.sendRequest('', options, function _onCallSuccessful(error, response, body) {
+  this.sendRequest(data, options, function _onCallSuccessful(error, response, body) {
     if (error) {
       return this.emit('error', error);
     }
@@ -86,7 +87,6 @@ Findme.prototype.find = function () {
   if (this.cookie && this.cookie.expires && this.cookie.expires > new Date()) {
     this.makeServiceCall();
   } else {
-
     var data = JSON.stringify(this.login);
     var options = {
       hostname: 'setup.icloud.com',
