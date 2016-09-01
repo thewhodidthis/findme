@@ -32,6 +32,8 @@ Findme.prototype.sendRequest = function (options, callback) {
   var method = options.method || this.request.method;
   var path = options.path || this.request.path;
 
+  headers['Content-Length'] = Buffer.byteLength(data);
+
   https.request({
     headers: headers,
     hostname: hostname,
