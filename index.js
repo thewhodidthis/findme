@@ -122,7 +122,7 @@ Findme.prototype.find = function () {
     this.makeServiceCall();
   } else {
 
-    // Login details
+    // Setup for logging in
     var options = {
       data: JSON.stringify(this.login),
       path: '/setup/ws/1/login',
