@@ -23,7 +23,7 @@
     "jscsrc": ".jscsrc"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "cleanup": "rm -f *.log",
     "lint": "(jshint index.js & jscs index.js --reporter=inlinesingle) 2>&1 | tee lint-js.log",
     "postlint": "find lint-js.log -size 0 -print0 | xargs -0 rm",
