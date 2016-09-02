@@ -1,5 +1,5 @@
 ## Findme
-> Just another take on the old sosumi class.
+> Just another take on the old sosumi class
 
 This server side module will only track device info. Please lookup other modules such as [find-my-iphone](https://github.com/matt-kruse/find-my-iphone) for extra functionality.
 
