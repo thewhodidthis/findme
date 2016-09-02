@@ -1,5 +1,5 @@
-var Config = require('../config');
 var Findme = require('../index.js');
+var Config = require('./config');
 
 var config = new Config();
 var findme = new Findme(config.user, config.pass);
