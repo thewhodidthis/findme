@@ -12,20 +12,32 @@ var EventEmitter = require('events').EventEmitter;
 function Findme(user, pass) {
   EventEmitter.call(this);
 
-  // Store settings
-  // TODO: add key, cert options for https
-  for (var key in Findme.defaults) {
-    this[key] = Findme.defaults[key];
-  }
+  // For making repeated calls once logged in
+  this.cookie = {};
 
   // Store credentials
-  this.login.apple_id = user;
-  this.login.password = pass;
+  this.login = {
+    apple_id: user,
+    password: pass,
+    extended_login: true
+  };
+
+  // Request defaults
+  // TODO: add key, cert options
+  this.request = {
+    headers: {
+      Origin: 'https://www.icloud.com',
+      'Content-Type': 'application/json; charset=utf-8'
+    },
+    method: 'POST'
+  };
 }
 
 util.inherits(Findme, EventEmitter);
 
 Findme.prototype.sendRequest = function (data, options, callback) {
+
+  // TODO: Explain
   options = Object.assign({}, this.request, options);
 
   options.headers = Object.assign({}, this.request.headers, options.headers);
@@ -60,7 +72,7 @@ Findme.prototype.sendRequest = function (data, options, callback) {
   }).end(data);
 };
 
-Findme.prototype.makeServiceCall = function () {
+Findme.prototype.ping = function () {
   var data = '';
   var options = {
     headers: {
@@ -85,7 +97,7 @@ Findme.prototype.find = function () {
 
   // Make the call if session available
   if (this.cookie && this.cookie.expires && this.cookie.expires > new Date()) {
-    this.makeServiceCall();
+    this.ping();
   } else {
     var data = JSON.stringify(this.login);
     var options = {
@@ -94,7 +106,7 @@ Findme.prototype.find = function () {
     };
 
     // Do login
-    // TODO: Lotsa binding going on
+    // TODO: Lotsa binding going on, reexamine?
     this.sendRequest(data, options, function _onLoginSuccessful(error, response, body) {
       if (error) {
         return this.emit('error', error);
@@ -129,24 +141,8 @@ Findme.prototype.find = function () {
       // Cleanup webservice url
       this.request.hostname = body.webservices.findme.url.replace(':443', '').replace('https://', '');
 
-      this.makeServiceCall();
+      this.ping();
     }.bind(this));
-  }
-};
-
-Findme.defaults = {
-  login: {
-    apple_id: '',
-    password: '',
-    extended_login: true
-  },
-  cookie: {},
-  request: {
-    headers: {
-      Origin: 'https://www.icloud.com',
-      'Content-Type': 'application/json; charset=utf-8'
-    },
-    method: 'POST'
   }
 };
 
