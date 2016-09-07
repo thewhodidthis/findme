@@ -12,7 +12,7 @@ setTimeout(function() {
 
 findme.on('data', function _onData(data) {
   data.forEach(function _logDeviceInfo(device) {
-    console.log(device.location);
+    console.log(device);
   });
 });
 
