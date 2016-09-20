@@ -10,6 +10,11 @@ var https = require('https');
 var EventEmitter = require('events').EventEmitter;
 
 function Findme(user, pass) {
+  if (this instanceof Findme === false) {
+    return new Findme(user, pass);
+  }
+
+  // TODO: Check instanceof Findme, return new Findme()
   EventEmitter.call(this);
 
   // For making repeated calls once logged in
