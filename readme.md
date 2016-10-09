@@ -5,7 +5,7 @@ This server side module will only track device info. Please lookup other modules
 
 ### Setup
 ```sh
-npm install thewhodidthis/findme --save
+npm install thewhodidthis/findme
 ```
 
 ### Usage
