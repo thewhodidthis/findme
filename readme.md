@@ -6,9 +6,9 @@
 ```sh
 npm install thewhodidthis/findme
 ```
-This server side script will only track device info. Please lookup other modules such as [find-my-iphone](https://github.com/matt-kruse/find-my-iphone) for extra functionality.
 
 ### Usage
+This server side script will only track device info. Please lookup other modules such as [find-my-iphone](https://github.com/matt-kruse/find-my-iphone) for extra functionality.
 ```js
 var Config = require('./config');
 var Sosumi = require('@thewhodidthis/findme');
