@@ -30,55 +30,6 @@ class Findme extends EventEmitter {
     };
   }
 
-  post(data, options, callback) {
-    options = Object.assign({}, this.https, options);
-
-    options.headers = Object.assign({}, this.https.headers, options.headers);
-    options.headers['Content-Length'] = Buffer.byteLength(data);
-
-    https
-      .request(options)
-      .on('error', callback)
-      .on('response', response => {
-        const body = [];
-
-        if (response.statusCode === 200) {
-          response.on('data', function _onData(chunk) {
-            body.push(chunk);
-          });
-
-          response.on('end', function _onEnd() {
-            return callback(null, response, JSON.parse(Buffer.concat(body)));
-          });
-        } else {
-          return callback(new Error('status code ' + response.statusCode), response, null);
-        }
-        response.on('error', callback);
-      })
-      .end(data);
-  }
-
-  ping() {
-    let data = '';
-    let options = {
-      headers: {
-        Cookie: this.cookie.content
-      },
-      hostname: this.https.hostname,
-      path: '/fmipservice/client/web/initClient'
-    };
-
-    // Send for device info
-    this.post(data, options, (error, response, body) => {
-      if (error) {
-        return this.emit('error', error);
-      }
-
-      // Alert all of device data
-      this.emit('data', body.content);
-    });
-  }
-
   find() {
 
     // If session available
@@ -132,6 +83,55 @@ class Findme extends EventEmitter {
         this.ping();
       });
     }
+  }
+
+  ping() {
+    let data = '';
+    let options = {
+      headers: {
+        Cookie: this.cookie.content
+      },
+      hostname: this.https.hostname,
+      path: '/fmipservice/client/web/initClient'
+    };
+
+    // Send for device info
+    this.post(data, options, (error, response, body) => {
+      if (error) {
+        return this.emit('error', error);
+      }
+
+      // Alert all of device data
+      this.emit('data', body.content);
+    });
+  }
+
+  post(data, options, callback) {
+    options = Object.assign({}, this.https, options);
+
+    options.headers = Object.assign({}, this.https.headers, options.headers);
+    options.headers['Content-Length'] = Buffer.byteLength(data);
+
+    https
+      .request(options)
+      .on('error', callback)
+      .on('response', response => {
+        const body = [];
+
+        if (response.statusCode === 200) {
+          response.on('data', function _onData(chunk) {
+            body.push(chunk);
+          });
+
+          response.on('end', function _onEnd() {
+            return callback(null, response, JSON.parse(Buffer.concat(body)));
+          });
+        } else {
+          return callback(new Error('status code ' + response.statusCode), response, null);
+        }
+        response.on('error', callback);
+      })
+      .end(data);
   }
 }
 
