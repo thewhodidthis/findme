@@ -1,7 +1,9 @@
-var Findme = require('../index.js');
+'use strict';
 
-var config = require('./config')();
-var findme = new Findme(config.user, config.pass);
+const Findme = require('../index.js');
+
+const config = require('./config')();
+const findme = new Findme(config.user, config.pass);
 
 findme.find();
 
