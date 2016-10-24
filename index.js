@@ -119,16 +119,17 @@ class Findme extends EventEmitter {
         const body = [];
 
         if (response.statusCode === 200) {
-          response.on('data', function _onData(chunk) {
+          response.on('data', chunk => {
             body.push(chunk);
           });
 
-          response.on('end', function _onEnd() {
+          response.on('end', () => {
             return callback(null, response, JSON.parse(Buffer.concat(body)));
           });
         } else {
           return callback(new Error('status code ' + response.statusCode), response, null);
         }
+
         response.on('error', callback);
       })
       .end(data);
