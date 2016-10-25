@@ -125,13 +125,13 @@ class Findme extends EventEmitter {
         const body = [];
 
         if (response.statusCode === 200) {
-          response.on('data', chunk => {
-            body.push(chunk);
-          });
-
-          response.on('end', () => {
-            return callback(null, response, JSON.parse(Buffer.concat(body)));
-          });
+          response
+            .on('data', chunk => {
+              body.push(chunk);
+            })
+            .on('end', () => {
+              return callback(null, response, JSON.parse(Buffer.concat(body)));
+            });
         } else {
           return callback(new Error('HTTP ' + response.statusCode), response, null);
         }
