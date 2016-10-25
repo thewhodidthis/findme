@@ -4,7 +4,7 @@
 const https = require('https');
 
 // Inherits from
-const EventEmitter = require('events').EventEmitter;
+const EventEmitter = require('events');
 
 class Findme extends EventEmitter {
   constructor(user, pass) {
@@ -38,14 +38,13 @@ class Findme extends EventEmitter {
       // Skip login
       this.ping();
     } else {
-      let data = JSON.stringify(this.login);
       let options = {
         hostname: 'setup.icloud.com',
         path: '/setup/ws/1/login'
       };
 
       // Do login
-      this.post(data, options, (error, response, body) => {
+      this.post(options, this.login, (error, response, body) => {
         if (error) {
           return this.emit('error', error);
         }
@@ -86,7 +85,6 @@ class Findme extends EventEmitter {
   }
 
   ping() {
-    let data = '';
     let options = {
       headers: {
         Cookie: this.cookie.content
@@ -96,7 +94,7 @@ class Findme extends EventEmitter {
     };
 
     // Send for device info
-    this.post(data, options, (error, response, body) => {
+    this.post(options, (error, response, body) => {
       if (error) {
         return this.emit('error', error);
       }
@@ -106,8 +104,16 @@ class Findme extends EventEmitter {
     });
   }
 
-  post(data, options, callback) {
-    options = Object.assign({}, this.https, options);
+  post(options, params, callback) {
+
+    // Set the callback if no params are passed
+    if (typeof params === 'function') {
+      callback = params;
+      params = {};
+    }
+
+    var data = JSON.stringify(params);
+    var options = Object.assign({}, this.https, options);
 
     options.headers = Object.assign({}, this.https.headers, options.headers);
     options.headers['Content-Length'] = Buffer.byteLength(data);
@@ -127,7 +133,7 @@ class Findme extends EventEmitter {
             return callback(null, response, JSON.parse(Buffer.concat(body)));
           });
         } else {
-          return callback(new Error('status code ' + response.statusCode), response, null);
+          return callback(new Error('HTTP ' + response.statusCode), response, null);
         }
 
         response.on('error', callback);
