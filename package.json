@@ -7,6 +7,7 @@
     "iphone",
     "sosumi"
   ],
+  "jsnext:main": "index.js",
   "main": "index.js",
   "homepage": "https://github.com/thewhodidthis/findme#readme",
   "repository": {
@@ -22,11 +23,22 @@
   "config": {
     "jscsrc": ".jscsrc"
   },
+  "eslintConfig": {
+    "extends": "airbnb-base",
+    "rules": {
+      "comma-dangle": 0,
+      "no-console": 0,
+      "strict": 0
+    },
+    "env": {
+      "node": true
+    }
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "cleanup": "rm -f *.log",
-    "lint": "(jshint index.js & jscs index.js --reporter=inlinesingle) 2>&1 | tee lint-js.log",
-    "postlint": "find lint-js.log -size 0 -print0 | xargs -0 rm",
+    "lint": "eslint index.js | tee eslint.log",
+    "postlint": "find eslint.log -size 0 -print0 | xargs -0 rm",
     "preversion": "npm run cleanup"
   },
   "engines": {
@@ -35,8 +47,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "jscs": "latest",
-    "jshint": "latest"
+    "eslint": "latest"
   },
   "author": "sChzs BkgNns <sotirios.bakagiannis@gmail.com> (https://www.thewhodidthis.com)",
   "license": "Unlicense"

@@ -31,14 +31,12 @@ class Findme extends EventEmitter {
   }
 
   find() {
-
     // If session available
     if (this.cookie && this.cookie.expires && this.cookie.expires > new Date()) {
-
       // Skip login
       this.ping();
     } else {
-      let options = {
+      const options = {
         hostname: 'setup.icloud.com',
         path: '/setup/ws/1/login'
       };
@@ -55,12 +53,10 @@ class Findme extends EventEmitter {
         }
 
         // I think it's safe to assume the headers key is part of the response
-        if (response.headers.hasOwnProperty('set-cookie') && Object.keys(this.cookie).length === 0) {
-          var cookieArray = response.headers['set-cookie'];
-
+        if ({}.hasOwnProperty.call(response.headers, 'set-cookie') && Object.keys(this.cookie).length === 0) {
+          const cookieArray = response.headers['set-cookie'];
           // Cleanup the cookie array returned after logging in
-          this.cookie.content = cookieArray.map((entry, idx) => {
-
+          this.cookie.content = cookieArray.map((entry) => {
             // Set the expiry date based on this cookie entry
             if (entry.includes('X-APPLE-WEBAUTH-USER')) {
               this.cookie.expires = new Date(entry.match(/Expires=(.*GMT+);/)[1]);
@@ -70,7 +66,6 @@ class Findme extends EventEmitter {
             return entry.substr(0, entry.indexOf(';'));
           }).join('; ');
         } else {
-
           // Reset the cookie store
           this.cookie = {};
         }
@@ -79,13 +74,13 @@ class Findme extends EventEmitter {
         this.https.hostname = body.webservices.findme.url.replace(':443', '').replace('https://', '');
 
         // Go
-        this.ping();
+        return this.ping();
       });
     }
   }
 
   ping() {
-    let options = {
+    const options = {
       headers: {
         Cookie: this.cookie.content
       },
@@ -100,20 +95,22 @@ class Findme extends EventEmitter {
       }
 
       // Alert all of device data
-      this.emit('data', body.content);
+      return this.emit('data', body.content);
     });
   }
 
-  post(options, params, callback) {
+  post(o, p, c) {
+    let params = p;
+    let callback = c;
 
     // Set the callback if no params are passed
-    if (typeof params === 'function') {
-      callback = params;
+    if (typeof p === 'function') {
+      callback = p;
       params = {};
     }
 
-    var data = JSON.stringify(params);
-    var options = Object.assign({}, this.https, options);
+    const data = JSON.stringify(params);
+    const options = Object.assign({}, this.https, o);
 
     options.headers = Object.assign({}, this.https.headers, options.headers);
     options.headers['Content-Length'] = Buffer.byteLength(data);
@@ -121,19 +118,17 @@ class Findme extends EventEmitter {
     https
       .request(options)
       .on('error', callback)
-      .on('response', response => {
+      .on('response', (response) => {
         const body = [];
 
         if (response.statusCode === 200) {
           response
-            .on('data', chunk => {
+            .on('data', (chunk) => {
               body.push(chunk);
             })
-            .on('end', () => {
-              return callback(null, response, JSON.parse(Buffer.concat(body)));
-            });
+            .on('end', () => callback(null, response, JSON.parse(Buffer.concat(body))));
         } else {
-          return callback(new Error('HTTP ' + response.statusCode), response, null);
+          return callback(new Error(`HTTP ${response.statusCode}`), response, null);
         }
 
         response.on('error', callback);
