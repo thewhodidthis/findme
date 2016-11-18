@@ -128,7 +128,7 @@ class Findme extends EventEmitter {
             })
             .on('end', () => callback(null, response, JSON.parse(Buffer.concat(body))));
         } else {
-          return callback(new Error(`HTTP ${response.statusCode}`), response, null);
+          callback(new Error(`HTTP ${response.statusCode}`), response, null);
         }
 
         response.on('error', callback);
