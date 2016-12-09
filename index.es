@@ -1,10 +1,9 @@
-'use strict';
-
-var https = require('https');
-var EventEmitter = require('events');
-
 // For handling icloud api interaction
+import * as https from 'https';
+
 // Inherits from
+import EventEmitter from 'events';
+
 class Findme extends EventEmitter {
   constructor(user, pass) {
     super(user, pass);
@@ -114,7 +113,8 @@ class Findme extends EventEmitter {
     options.headers = Object.assign({}, this.https.headers, options.headers);
     options.headers['Content-Length'] = Buffer.byteLength(data);
 
-    https.request(options)
+    https
+      .request(options)
       .on('error', callback)
       .on('response', (response) => {
         const body = [];
@@ -135,4 +135,4 @@ class Findme extends EventEmitter {
   }
 }
 
-module.exports = Findme;
+export default Findme;
