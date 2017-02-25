@@ -3,8 +3,6 @@
 var https = require('https');
 var EventEmitter = require('events');
 
-// For handling icloud api interaction
-// Inherits from
 class Findme extends EventEmitter {
   constructor(user, pass) {
     super(user, pass);

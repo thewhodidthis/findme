@@ -1,7 +1,4 @@
-// For handling icloud api interaction
 import * as https from 'https';
-
-// Inherits from
 import EventEmitter from 'events';
 
 class Findme extends EventEmitter {
