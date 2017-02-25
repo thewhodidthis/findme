@@ -12,16 +12,16 @@ class Findme extends EventEmitter {
     this.login = {
       apple_id: user,
       password: pass,
-      extended_login: true
+      extended_login: true,
     };
 
     // Request defaults
     this.https = {
       headers: {
         Origin: 'https://www.icloud.com',
-        'Content-Type': 'application/json; charset=utf-8'
+        'Content-Type': 'application/json; charset=utf-8',
       },
-      method: 'POST'
+      method: 'POST',
     };
   }
 
@@ -33,7 +33,7 @@ class Findme extends EventEmitter {
     } else {
       const options = {
         hostname: 'setup.icloud.com',
-        path: '/setup/ws/1/login'
+        path: '/setup/ws/1/login',
       };
 
       // Do login
@@ -77,10 +77,10 @@ class Findme extends EventEmitter {
   ping() {
     const options = {
       headers: {
-        Cookie: this.cookie.content
+        Cookie: this.cookie.content,
       },
       hostname: this.https.hostname,
-      path: '/fmipservice/client/web/initClient'
+      path: '/fmipservice/client/web/initClient',
     };
 
     // Send for device info
