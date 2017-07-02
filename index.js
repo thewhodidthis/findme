@@ -1,136 +1,99 @@
 'use strict';
 
 var https = require('https');
-var EventEmitter = require('events');
 
-class Findme extends EventEmitter {
-  constructor(user, pass) {
-    super(user, pass);
+const défauts = {
+  headers: { 'Content-Type': 'application/json; charset=utf-8', Origin: 'https://www.icloud.com' },
+  hostname: 'setup.icloud.com',
+  method: 'POST',
+  path: '/setup/ws/1/login',
+};
 
-    // For making repeated calls once logged in
-    this.cookie = {};
+const send = (options, echo, data = '') => {
+  Object.assign(options.headers, { 'Content-Length': Buffer.byteLength(data) });
 
-    // Store credentials
-    this.login = {
-      apple_id: user,
-      password: pass,
-      extended_login: true
-    };
+  https.request(options)
+    .on('error', echo)
+    .on('response', (response) => {
+      const body = [];
 
-    // Request defaults
-    this.https = {
-      headers: {
-        Origin: 'https://www.icloud.com',
-        'Content-Type': 'application/json; charset=utf-8'
-      },
-      method: 'POST'
-    };
-  }
-
-  find() {
-    // If session available
-    if (this.cookie && this.cookie.expires && this.cookie.expires > new Date()) {
-      // Skip login
-      this.ping();
-    } else {
-      const options = {
-        hostname: 'setup.icloud.com',
-        path: '/setup/ws/1/login'
-      };
-
-      // Do login
-      this.post(options, this.login, (error, response, body) => {
-        if (error) {
-          return this.emit('error', error);
-        }
-
-        // Break if findme webservice disabled
-        if (body.webservices.findme.status !== 'active') {
-          return this.emit('error', new Error('findme service disabled'));
-        }
-
-        // I think it's safe to assume the headers key is part of the response
-        if ({}.hasOwnProperty.call(response.headers, 'set-cookie') && Object.keys(this.cookie).length === 0) {
-          const cookieArray = response.headers['set-cookie'];
-          // Cleanup the cookie array returned after logging in
-          this.cookie.content = cookieArray.map((entry) => {
-            // Set the expiry date based on this cookie entry
-            if (entry.includes('X-APPLE-WEBAUTH-USER')) {
-              this.cookie.expires = new Date(entry.match(/Expires=(.*GMT+);/)[1]);
-            }
-
-            // Keep the part up to the first semicolon
-            return entry.substr(0, entry.indexOf(';'));
-          }).join('; ');
-        } else {
-          // Reset the cookie store
-          this.cookie = {};
-        }
-
-        // Cleanup webservice url
-        this.https.hostname = body.webservices.findme.url.replace(':443', '').replace('https://', '');
-
-        // Go
-        return this.ping();
-      });
-    }
-  }
-
-  ping() {
-    const options = {
-      headers: {
-        Cookie: this.cookie.content
-      },
-      hostname: this.https.hostname,
-      path: '/fmipservice/client/web/initClient'
-    };
-
-    // Send for device info
-    this.post(options, (error, response, body) => {
-      if (error) {
-        return this.emit('error', error);
+      if (response.statusCode === 200) {
+        response
+          .on('data', (chunk) => {
+            body.push(chunk);
+          })
+          .on('end', () => echo(null, response, JSON.parse(Buffer.concat(body))));
+      } else {
+        echo(Error(`HTTP ${response.statusCode}`), response, null);
       }
 
-      // Alert all of device data
-      return this.emit('data', body.content);
-    });
-  }
+      response.on('error', echo);
+    })
+    .end(data);
+};
 
-  post(o, p, c) {
-    let params = p;
-    let callback = c;
+/**
+ * Helps query find my iPhone service
+ * @module findme
+ * @param {Object} - apple id
+ * @returns {Function}
+ * @example
+ * const finder = findme({ apple_id: ***, password: *** });
+ */
+const find = (appleId) => {
+  const id = Object.assign(appleId, { extended_login: true });
 
-    // Set the callback if no params are passed
-    if (typeof p === 'function') {
-      callback = p;
-      params = {};
+  const session = { id: JSON.stringify(id), expires: Date() };
+  const options = Object.assign({}, défaut);
+
+  const login = reply => (error, response, body) => {
+    if (error) {
+      reply(error);
+
+      return;
     }
 
-    const data = JSON.stringify(params);
-    const options = Object.assign({}, this.https, o);
+    const { findme } = body.webservices;
 
-    options.headers = Object.assign({}, this.https.headers, options.headers);
-    options.headers['Content-Length'] = Buffer.byteLength(data);
+    // Break away if findme disabled
+    if (findme.status !== 'active') {
+      reply(Error('findme service disabled'));
 
-    https.request(options)
-      .on('error', callback)
-      .on('response', (response) => {
-        const body = [];
+      return;
+    }
 
-        if (response.statusCode === 200) {
-          response
-            .on('data', (chunk) => {
-              body.push(chunk);
-            })
-            .on('end', () => callback(null, response, JSON.parse(Buffer.concat(body))));
-        } else {
-          callback(new Error(`HTTP ${response.statusCode}`), response, null);
-        }
+    // Get cookie array
+    const cookie = response.headers['set-cookie'];
 
-        response.on('error', callback);
-      })
-      .end(data);
-  }
-}
+    if (cookie) {
+      // Set the expiry date based on this cookie entry
+      const webauth = cookie.filter(entry => entry.includes('X-APPLE-WEBAUTH-USER')).shift();
+      const expires = webauth.match(/Expires=(.*GMT+);/).pop();
 
-module.exports = Findme;
+      session.expires = Date(expires);
+
+      // Cleanup cookie array and update headers
+      options.headers.Cookie = cookie.map(entry => entry.substr(0, entry.indexOf(';'))).join('; ');
+    }
+
+    // Cleanup webservice url, update path, hostname
+    options.hostname = findme.url.replace(':443', '').replace('https://', '');
+    options.path = '/fmipservice/client/web/initClient';
+
+    // Make the call
+    send(options, reply);
+  };
+
+  return (reply) => {
+    // If session within limits
+    if (session.expires > Date()) {
+      // Go ahead
+      send(options, reply);
+    } else {
+      // Login first
+      send(défauts, login(reply), session.id);
+    }
+  };
+};
+
+module.exports = find;
