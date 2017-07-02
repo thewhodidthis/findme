@@ -7,8 +7,8 @@
     "iphone",
     "sosumi"
   ],
-  "jsnext:main": "index.es",
   "main": "index.js",
+  "module": "index.es",
   "homepage": "https://github.com/thewhodidthis/findme#readme",
   "repository": {
     "type": "git",
@@ -17,20 +17,10 @@
   "bugs": {
     "url": "https://github.com/thewhodidthis/findme/issues"
   },
-  "directories": {
-    "example": "example"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "cleanup": "rm -f *.log",
-    "lint": "eslint index.es; exit 0",
-    "start": "npm run cleanup && npm run build",
-    "predocs": "rollup -c",
-    "docs": "docco -e .js index.es",
-    "preexample": "npm start",
-    "example": "node example",
-    "build": "rollup -c",
-    "preversion": "npm start"
+    "test": "node test",
+    "lint": "eslint test example index.es",
+    "start": "rollup -e https -f cjs -o index.js index.es"
   },
   "engines": {
     "node": ">=4.2.4",
@@ -38,11 +28,11 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "docco": "latest",
-    "eslint": "latest",
-    "eslint-plugin-import": "latest",
+    "eslint": "^3.19.0",
     "eslint-config-airbnb-base": "latest",
-    "rollup": "latest"
+    "eslint-plugin-import": "latest",
+    "rollup": "latest",
+    "tape": "latest"
   },
   "author": "sChzs BkgNns <sotirios.bakagiannis@gmail.com> (https://www.thewhodidthis.com)",
   "license": "Unlicense"
