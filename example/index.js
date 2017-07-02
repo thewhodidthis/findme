@@ -1,22 +1,19 @@
-'use strict';
+const config = require('../config')();
+const finder = require('../')(config);
 
-const Findme = require('../index.js');
+const logger = (error, response, body) => {
+  if (error) {
+    console.error(error);
+    process.exit(1);
+  } else {
+    body.content.forEach(console.log);
+  }
+};
 
-const config = require('./config')();
-const findme = new Findme(config.user, config.pass);
+const findme = () => finder(logger);
 
-findme.find();
+findme();
 
 // Try again to check cookie's been properly set
-setTimeout(() => {
-  findme.find();
-}, 30000);
+setTimeout(findme, 30000);
 
-findme.on('data', (data) => {
-  data.forEach(console.log);
-});
-
-findme.on('error', (error) => {
-  console.error(error);
-  process.exit(1);
-});
