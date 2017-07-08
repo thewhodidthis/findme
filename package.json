@@ -2,13 +2,8 @@
   "name": "@thewhodidthis/findme",
   "version": "0.1.1",
   "description": "Just another take on the old sosumi class",
-  "keywords": [
-    "icloud",
-    "iphone",
-    "sosumi"
-  ],
+  "keywords": ["icloud", "iphone", "sosumi"],
   "main": "index.js",
-  "module": "index.es",
   "homepage": "https://github.com/thewhodidthis/findme#readme",
   "repository": {
     "type": "git",
@@ -18,20 +13,21 @@
     "url": "https://github.com/thewhodidthis/findme/issues"
   },
   "scripts": {
+    "pretest": "eslint .",
     "test": "node test",
-    "lint": "eslint test example index.es",
-    "start": "rollup -e https -f cjs -o index.js index.es"
+    "start": "node example"
+  },
+  "eslintConfig": {
+    "extends": "@thewhodidthis"
   },
   "engines": {
-    "node": ">=4.2.4",
-    "npm": ">=3.5.3"
+    "node": ">=6.4.0",
+    "npm": ">=3.10.3"
   },
   "dependencies": {},
   "devDependencies": {
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb-base": "latest",
-    "eslint-plugin-import": "latest",
-    "rollup": "latest",
+    "@thewhodidthis/eslint-config": "latest",
+    "eslint": "latest",
     "tape": "latest"
   },
   "author": "sChzs BkgNns <sotirios.bakagiannis@gmail.com> (https://www.thewhodidthis.com)",
