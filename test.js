@@ -12,4 +12,3 @@ test('will report', (t) => {
     t.ok(body.content[0].msg.statusCode, 200)
   })
 })
-
