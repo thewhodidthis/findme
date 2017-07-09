@@ -3,10 +3,13 @@
 const https = require('https')
 
 const defaults = {
-  headers: { 'Content-Type': 'application/json; charset=utf-8', Origin: 'https://www.icloud.com' },
+  headers: {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Origin': 'https://www.icloud.com'
+  },
   hostname: 'setup.icloud.com',
   method: 'POST',
-  path: '/setup/ws/1/login',
+  path: '/setup/ws/1/login'
 }
 
 const send = ({ request = defaults, callback = (() => {}), data = '' } = {}) => {
@@ -35,8 +38,8 @@ const send = ({ request = defaults, callback = (() => {}), data = '' } = {}) => 
 /**
  * Helps query find my iPhone service
  * @module findme
- * @param {Object} - apple id
- * @returns {Function}
+ * @param {Object} appleId - apple id
+ * @returns {Function} - go find me
  * @example
  * const finder = findme({ apple_id: ***, password: *** });
  */
