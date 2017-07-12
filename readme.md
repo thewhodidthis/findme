@@ -13,12 +13,12 @@ const config = require('./config')();
 const findme = require('@thewhodidthis/findme')(config);
 
 findme((error, response, body) => {
-	if (error) {
-		console.error(error);
-	} else {
-		body.content.forEach((device) => {
-			console.log(device.deviceModel)
-		});
-	}
+    if (error) {
+        console.error(error);
+    } else {
+        body.content.forEach((device) => {
+            console.log(device.deviceModel)
+        });
+    }
 });
 ```
