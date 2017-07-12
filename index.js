@@ -12,10 +12,11 @@ const defaults = {
   path: '/setup/ws/1/login'
 }
 
-const send = ({ request = defaults, callback = (() => {}), data = '' } = {}) => {
-  Object.assign(request.headers, { 'Content-Length': Buffer.byteLength(data) })
+const send = ({ options = defaults, callback = (() => {}), data = '' } = {}) => {
+  Object.assign(options.headers, { 'Content-Length': Buffer.byteLength(data) })
 
-  https.request(request)
+  https
+    .request(options)
     .on('error', callback)
     .on('response', (response) => {
       const body = []
@@ -44,7 +45,7 @@ const send = ({ request = defaults, callback = (() => {}), data = '' } = {}) => 
  * const finder = findme({ apple_id: ***, password: *** });
  */
 const find = (appleId) => {
-  const request = Object.assign({}, defaults)
+  const options = Object.assign({}, defaults)
 
   const id = Object.assign(appleId, { extended_login: true })
   const login = { id: JSON.stringify(id), expires: Date() }
@@ -76,22 +77,22 @@ const find = (appleId) => {
       login.expires = Date(expires)
 
       // Cleanup cookie array and update headers
-      request.headers.Cookie = cookie.map(entry => entry.substr(0, entry.indexOf(';'))).join('; ')
+      options.headers.Cookie = cookie.map(entry => entry.substr(0, entry.indexOf(';'))).join('; ')
     }
 
     // Cleanup webservice url, update path, hostname
-    request.hostname = findme.url.replace(':443', '').replace('https://', '')
-    request.path = '/fmipservice/client/web/initClient'
+    options.hostname = findme.url.replace(':443', '').replace('https://', '')
+    options.path = '/fmipservice/client/web/initClient'
 
     // Make the call
-    send({ request, callback })
+    send({ options, callback })
   }
 
   return (callback) => {
     // If session within limits
     if (login.expires > Date()) {
       // Go ahead
-      send({ request, callback })
+      send({ options, callback })
     } else {
       // Login first
       send({ callback: pivot(callback), data: login.id })
