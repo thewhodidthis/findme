@@ -19,14 +19,12 @@ const send = ({ options = defaults, callback = (() => {}), data = '' } = {}) => 
     .request(options)
     .on('error', callback)
     .on('response', (response) => {
-      const body = []
-
       if (response.statusCode === 200) {
+        const body = []
+
         response
-          .on('data', (chunk) => {
-            body.push(chunk)
-          })
-          .on('end', () => callback(null, response, JSON.parse(Buffer.concat(body))))
+          .on('data', (chunk) => { body.push(chunk) })
+          .on('end', () => { callback(null, response, JSON.parse(Buffer.concat(body))) })
       } else {
         callback(Error(`HTTP ${response.statusCode}`), response, null)
       }
