@@ -1,17 +1,19 @@
+'use strict'
+
 const config = require('./config')()
 const finder = require('./')(config)
 
-const logger = (error, response, body) => {
+// Prep
+const findme = () => finder((error, { content }) => {
   if (error) {
     console.error(error)
     process.exit(1)
   } else {
-    body.content.forEach(console.log)
+    content.forEach(console.log)
   }
-}
+})
 
-const findme = () => finder(logger)
-
+// Go
 findme()
 
 // Try again to check cookie's been properly set
