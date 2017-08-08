@@ -2,6 +2,7 @@
 
 const https = require('https')
 
+// Fill in these request options in advance, override later if need be
 const defaults = {
   headers: {
     'Content-Type': 'application/json; charset=utf-8',
@@ -12,7 +13,8 @@ const defaults = {
   path: '/setup/ws/1/login'
 }
 
-const send = ({ options = defaults, callback = (() => {}), data = '' } = {}) => {
+// Built-in `https` request wrapper
+const send = ({ options = defaults, callback = () => {}, data = '' } = {}) => {
   Object.assign(options.headers, { 'Content-Length': Buffer.byteLength(data) })
 
   https
@@ -24,9 +26,9 @@ const send = ({ options = defaults, callback = (() => {}), data = '' } = {}) => 
 
         response
           .on('data', (chunk) => { body.push(chunk) })
-          .on('end', () => { callback(null, response, JSON.parse(Buffer.concat(body))) })
+          .on('end', () => { callback(null, JSON.parse(Buffer.concat(body)), response) })
       } else {
-        callback(Error(`HTTP ${response.statusCode}`), response, null)
+        callback(Error(`HTTP ${response.statusCode}`), null, response)
       }
 
       response.on('error', callback)
@@ -48,7 +50,7 @@ const find = (appleId) => {
   const id = Object.assign(appleId, { extended_login: true })
   const login = { id: JSON.stringify(id), expires: Date() }
 
-  const pivot = callback => (error, response, body) => {
+  const pivot = callback => (error, body, response) => {
     if (error) {
       callback(error)
 
@@ -78,7 +80,7 @@ const find = (appleId) => {
       options.headers.Cookie = cookie.map(entry => entry.substr(0, entry.indexOf(';'))).join('; ')
     }
 
-    // Cleanup webservice url, update path, hostname
+    // Cleanup webservice url, update request path, hostname
     options.hostname = findme.url.replace(':443', '').replace('https://', '')
     options.path = '/fmipservice/client/web/initClient'
 
