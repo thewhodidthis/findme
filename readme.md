@@ -12,7 +12,7 @@ This server side script will only track device info. Please lookup other modules
 const config = require('./config')();
 const findme = require('@thewhodidthis/findme')(config);
 
-findme((error, response, body) => {
+findme((error, body, response) => {
     if (error) {
         console.error(error);
     } else {
