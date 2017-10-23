@@ -1,21 +1,18 @@
 'use strict'
 
-const test = require('tape')
+const assert = require('tapeless')
 
 const config = require('./config')()
 const findme = require('./')(config)
 
-test('will report', (t) => {
-  t.plan(3)
+const { ok, equal, doesNotThrow } = assert
 
-  findme((error, { content }) => {
-    t.error(error, 'Response errors none')
-    t.ok(content.length)
-    t.ok(content[0].msg.statusCode, 200)
-  })
+doesNotThrow(findme, Error, 'does not throw', 'will proceed sans callback')
+
+findme((error, { content }) => {
+  equal(error, null, 'response errors none', 'will report')
+
+  ok(content.length)
+  equal(content[0].msg.statusCode, 200)
 })
 
-test('will run sans callback', (t) => {
-  t.doesNotThrow(findme)
-  t.end()
-})
