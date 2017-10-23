@@ -1,4 +1,3 @@
-## Findme
 > Just another take on the old sosumi class
 
 ### Setup
@@ -13,7 +12,7 @@ This server side script will only track device info. Please lookup other modules
 const config = require('./config')()
 const findme = require('@thewhodidthis/findme')(config)
 
-findme((error, { content }, response) => {
+findme((error, { content }) => {
     if (error) {
         console.error(error)
     } else {
@@ -22,4 +21,14 @@ findme((error, { content }, response) => {
         })
     }
 })
+```
+
+```js
+// config.js
+module.exports = function () {
+  return {
+    apple_id: 'foo@bar.com',
+    password: '***'
+  }
+}
 ```
