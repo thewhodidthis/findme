@@ -39,10 +39,10 @@ const send = ({ options = defaults, callback = () => {}, data = '' } = {}) => {
 /**
  * Helps query find my iPhone service
  * @module findme
- * @param {Object} appleId - apple id
- * @returns {Function} - go find me
+ * @param {object} appleId - apple id
+ * @returns {function} - go find me
  * @example
- * const finder = findme({ apple_id: ***, password: *** });
+ * const finder = findme({ apple_id: ***, password: *** })
  */
 const find = (appleId) => {
   const options = Object.assign({}, defaults)
