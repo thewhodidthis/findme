@@ -14,7 +14,7 @@ const defaults = {
 }
 
 // Built-in `https` request wrapper
-const send = ({ options = defaults, callback = () => {}, data = '' } = {}) => {
+const send = ({ callback = v => v, options = defaults, data = '' } = {}) => {
   Object.assign(options.headers, { 'Content-Length': Buffer.byteLength(data) })
 
   https
@@ -85,14 +85,14 @@ const find = (appleId) => {
     options.path = '/fmipservice/client/web/initClient'
 
     // Make the call
-    send({ options, callback })
+    send({ callback, options })
   }
 
   return (callback) => {
     // If session within limits
     if (login.expires > Date()) {
       // Go ahead
-      send({ options, callback })
+      send({ callback, options })
     } else {
       // Login first
       send({ callback: pivot(callback), data: login.id })
