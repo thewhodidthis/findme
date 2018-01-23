@@ -26,9 +26,9 @@ findme((error, { content }) => {
 ```js
 // config.js
 module.exports = function () {
-  return {
-    apple_id: 'foo@bar.com',
-    password: '***'
-  }
+    return {
+        apple_id: 'foo@bar.com',
+        password: '***'
+    }
 }
 ```
