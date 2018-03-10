@@ -29,6 +29,9 @@
     "eslint": "latest",
     "tapeless": "latest"
   },
+  "keywords": [
+    "sosumi"
+  ],
   "author": "sChzs BkgNns <sotirios.bakagiannis@gmail.com> (https://www.thewhodidthis.com)",
   "license": "Unlicense"
 }
