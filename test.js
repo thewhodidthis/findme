@@ -7,12 +7,15 @@ const findme = require('./')(config)
 
 const { ok, equal, doesNotThrow } = assert
 
-doesNotThrow(findme, Error, 'does not throw', 'will proceed sans callback')
+doesNotThrow
+  .describe('does not throw', 'will proceed sans callback')
+  .test(findme, Error)
 
 findme((error, { content }) => {
-  equal(error, null, 'response errors none', 'will report')
+  equal
+    .describe('response errors none', 'will report')
+    .test(error, null)
 
-  ok(content.length)
-  equal(content[0].msg.statusCode, 200)
+  ok.test(content.length)
+  equal.test(content[0].msg.statusCode, 200)
 })
-
