@@ -4,7 +4,7 @@ const config = require('./config')()
 const finder = require('./')(config)
 
 // Prep
-const findme = () => finder((error, { content }) => {
+const findme = () => finder((error, { content = [] } = {}) => {
   if (error) {
     console.error(error)
     process.exit(1)
