@@ -14,11 +14,11 @@ const defaults = {
 }
 
 // Built-in `https` request wrapper
-const send = ({ callback = v => v, options = defaults, data = '' } = {}) => {
-  Object.assign(options.headers, { 'Content-Length': Buffer.byteLength(data) })
+const send = ({ callback = v => v, settings = defaults, data = '' } = {}) => {
+  Object.assign(settings.headers, { 'Content-Length': Buffer.byteLength(data) })
 
   https
-    .request(options)
+    .request(settings)
     .on('error', callback)
     .on('response', (response) => {
       if (response.statusCode === 200) {
@@ -39,15 +39,17 @@ const send = ({ callback = v => v, options = defaults, data = '' } = {}) => {
 /**
  * Helps query find my iPhone service
  * @module findme
- * @param {object} - apple id
- * @returns {function}
+ * @param {object} config - apple login info
+ * @param {string} config.apple_id - email
+ * @param {string} config.password - secret
+ * @returns {function} - accepts a response handler
  * @example
  * const finder = findme({ apple_id: ***, password: *** })
  */
-const find = (appleId) => {
-  const options = Object.assign({}, defaults)
+const find = (config) => {
+  const settings = Object.assign({}, defaults)
 
-  const id = Object.assign(appleId, { extended_login: true })
+  const id = Object.assign(config, { extended_login: true })
   const login = { id: JSON.stringify(id), expires: Date() }
 
   const pivot = callback => (error, body, response) => {
@@ -71,28 +73,28 @@ const find = (appleId) => {
 
     if (cookie) {
       // Set the expiry date based on this cookie entry
-      const webauth = cookie.filter(entry => entry.includes('X-APPLE-WEBAUTH-USER')).shift()
+      const webauth = cookie.filter(item => item.includes('X-APPLE-WEBAUTH-USER')).shift()
       const expires = webauth.match(/Expires=(.*GMT+);/).pop()
 
       login.expires = Date(expires)
 
       // Cleanup cookie array and update headers
-      options.headers.Cookie = cookie.map(entry => entry.substr(0, entry.indexOf(';'))).join('; ')
+      settings.headers.Cookie = cookie.map(item => item.substr(0, item.indexOf(';'))).join('; ')
     }
 
     // Cleanup webservice url, update request path, hostname
-    options.hostname = findme.url.replace(':443', '').replace('https://', '')
-    options.path = '/fmipservice/client/web/initClient'
+    settings.hostname = findme.url.replace(':443', '').replace('https://', '')
+    settings.path = '/fmipservice/client/web/initClient'
 
     // Make the call
-    send({ callback, options })
+    send({ callback, settings })
   }
 
   return (callback) => {
     // If session within limits
     if (login.expires > Date()) {
       // Go ahead
-      send({ callback, options })
+      send({ callback, settings })
     } else {
       // Login first
       send({ callback: pivot(callback), data: login.id })
