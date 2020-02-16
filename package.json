@@ -23,11 +23,10 @@
     "node": ">=6.4.0",
     "npm": ">=3.10.3"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@thewhodidthis/eslint-config": "latest",
+    "@thewhodidthis/eslint-config": "^0.0.11",
     "eslint": "^6.8.0",
-    "tapeless": "latest"
+    "tapeless": "^0.0.7"
   },
   "keywords": [
     "sosumi"
