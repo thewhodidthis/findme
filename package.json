@@ -2,35 +2,36 @@
   "name": "@thewhodidthis/findme",
   "version": "2.0.5",
   "description": "Just another take on the old sosumi class",
-  "main": "index.js",
+  "keywords": [
+    "sosumi"
+  ],
   "homepage": "https://github.com/thewhodidthis/findme#readme",
+  "bugs": {
+    "url": "https://github.com/thewhodidthis/findme/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thewhodidthis/findme.git"
   },
-  "bugs": {
-    "url": "https://github.com/thewhodidthis/findme/issues"
-  },
+  "license": "ISC",
+  "author": "Sotiri Bakagiannis <sotirios.bakagiannis@gmail.com> (http://thewhodidthis.com)",
+  "main": "index.js",
   "scripts": {
+    "start": "node example",
     "pretest": "eslint .",
-    "test": "node test",
-    "start": "node example"
+    "test": "node test"
   },
   "eslintConfig": {
     "extends": "@thewhodidthis"
   },
+  "dependencies": {},
+  "devDependencies": {
+    "@thewhodidthis/eslint-config": "^0.0.18",
+    "eslint": "^6.8.0",
+    "tapeless": "^0.0.10"
+  },
   "engines": {
     "node": ">=6.4.0",
     "npm": ">=3.10.3"
-  },
-  "devDependencies": {
-    "@thewhodidthis/eslint-config": "^0.0.11",
-    "eslint": "^6.8.0",
-    "tapeless": "^0.0.7"
-  },
-  "keywords": [
-    "sosumi"
-  ],
-  "author": "sChzs BkgNns <sotirios.bakagiannis@gmail.com> (https://www.thewhodidthis.com)",
-  "license": "Unlicense"
+  }
 }
