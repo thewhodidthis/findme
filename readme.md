@@ -13,22 +13,22 @@ const config = require('./config')()
 const findme = require('@thewhodidthis/findme')(config)
 
 findme((error, { content }) => {
-    if (error) {
-        console.error(error)
-    } else {
-        content.forEach((device) => {
-            console.log(device.deviceModel)
-        })
-    }
+  if (error) {
+    console.error(error)
+  } else {
+    content.forEach((device) => {
+      console.log(device.deviceModel)
+    })
+  }
 })
 ```
 
 ```js
-// config.js
+// Config.js
 module.exports = function () {
-    return {
-        apple_id: 'foo@bar.com',
-        password: '***'
-    }
+  return {
+    apple_id: 'foo@bar.com',
+    password: '***'
+  }
 }
 ```
