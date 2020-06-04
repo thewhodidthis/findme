@@ -17,9 +17,9 @@
   "author": "Sotiri Bakagiannis <sotirios.bakagiannis@gmail.com> (http://thewhodidthis.com)",
   "main": "index.js",
   "scripts": {
-    "start": "node example",
+    "start": "node example.js",
     "pretest": "eslint .",
-    "test": "node test"
+    "test": "node test.js"
   },
   "eslintConfig": {
     "extends": "@thewhodidthis"
