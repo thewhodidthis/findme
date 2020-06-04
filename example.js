@@ -1,9 +1,17 @@
 'use strict'
 
-const config = require('./config')()
-const finder = require('./')(config)
+// Credentials sourced from a non git checked
+// '.npmrc' or 'package.json' config block, or
+// passed in as environment variables
+const {
+  PASSWORD, npm_config_password: password = PASSWORD,
+  APPLE_ID, npm_config_apple_id: apple_id = APPLE_ID
+} = process.env
 
-// Prep
+// 1. Pass in credentials
+const finder = require('./')({ password, apple_id })
+
+// 2. Stage response callback handler
 const findme = () => finder((error, { content = [] } = {}) => {
   if (error) {
     console.error(error)
@@ -13,7 +21,7 @@ const findme = () => finder((error, { content = [] } = {}) => {
   }
 })
 
-// Go
+// 3. Send request
 findme()
 
 // Try again to check cookie's been properly set
