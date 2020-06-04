@@ -1,11 +1,10 @@
 'use strict'
 
-const assert = require('tapeless')
+// Using a local '.npmrc' is an easy way of sourcing private keys
+const { npm_config_password: password, npm_config_apple_id: apple_id } = process.env
+const findme = require('./')({ password, apple_id })
 
-const config = require('./config')()
-const findme = require('./')(config)
-
-const { ok, equal, doesNotThrow } = assert
+const { ok, equal, doesNotThrow } = require('tapeless')
 
 doesNotThrow
   .describe('does not throw', 'will proceed sans callback')
