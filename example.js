@@ -1,6 +1,6 @@
 'use strict'
 
-// Credentials sourced from a non git checked
+// Credentials sourced from a git-ignored
 // '.npmrc' or 'package.json' config block, or
 // passed in as environment variables
 const {
