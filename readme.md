@@ -1,28 +1,33 @@
 ## about
 
-Just another take on the old [sosumi](https://en.wikipedia.org/wiki/Sosumi) class.
+Just another take on the old [sosumi](https://en.wikipedia.org/wiki/Sosumi) class. Tracks device data only. 
 
 ## setup
 
 Fetch the latest version from GitHub directly:
 
 ```sh
-# No deps
+# No side deps
 npm install thewhodidthis/findme
+
+# Try example
+export $(cat .npmrc) && node node_modules/@thewhodidthis/findme/example.js
 ```
 
 ## usage
 
-This server side script will only track device data. Please create an [`.npmrc`](https://docs.npmjs.com/files/npmrc#per-project-config-file) with your own `password` and `apple_id` information to test or to get the enclosed example working locally. Alternatively, credentials may be loaded using a CJS module as follows:
+Please create an [`.npmrc`](https://docs.npmjs.com/files/npmrc#per-project-config-file) with your own `PASSWORD` and `APPLE_ID` information to test or to get the enclosed example working locally. 
+
+```npmrc
+APPLE_ID=baz@bar.foo
+PASSWORD=***
+```
+
+In practice, credentials may, of course, be loaded using a CJS module along the lines of:
 
 ```js
 // Sample 'config.js'
-module.exports = function () {
-  return {
-    apple_id: 'foo@bar.com',
-    password: '***'
-  }
-}
+module.exports = () => ({ apple_id: 'foo@bar', password: '***' })
 ```
 
 To then be exracting model information for each of your devices for example,
@@ -34,10 +39,12 @@ const config = require('./config')()
 const findme = require('@thewhodidthis/findme')(config)
 
 // Issue request
-findme((error, { content }) => {
+findme((error, result) => {
   if (error) {
     console.error(error)
   } else {
+    const { content } = JSON.parse(result)
+
     content.forEach((device) => {
       console.log(device.deviceModel)
     })
@@ -46,4 +53,5 @@ findme((error, { content }) => {
 ```
 
 ## see also
+
 - [find-my-iphone](https://github.com/matt-kruse/find-my-iphone)
