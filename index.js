@@ -2,68 +2,78 @@
 
 const https = require('https')
 
-// Fill in these request options in advance, override later if need be
-const defaults = {
-  headers: {
+// Wraps `https.request()` to post to the API and pass back the response
+const send = (options = {}, callback) => {
+  // Defaults reflect initial login setup
+  const { content, cookie, hostname = 'setup.icloud.com', path = '/setup/ws/1/login' } = options
+  const method = 'POST'
+  const headers = {
     'Content-Type': 'application/json; charset=utf-8',
     'Origin': 'https://www.icloud.com'
-  },
-  hostname: 'setup.icloud.com',
-  method: 'POST',
-  path: '/setup/ws/1/login'
-}
+  }
 
-// Built-in `https` request wrapper
-const send = ({ callback = v => v, settings = defaults, data = '' } = {}) => {
-  Object.assign(settings.headers, { 'Content-Length': Buffer.byteLength(data) })
+  // When credentials are present on initial login
+  if (content) {
+    headers['Content-Length'] = Buffer.byteLength(content)
+  }
+
+  // After successful login
+  if (cookie) {
+    headers['Cookie'] = cookie
+  }
 
   https
-    .request(settings)
+    .request({ headers, hostname, method, path })
     .on('error', callback)
     .on('response', (response) => {
-      if (response.statusCode === 200) {
-        const body = []
+      const { statusMessage, statusCode } = response
+
+      // Blanket reject all non-OK responses
+      if (statusCode === 200) {
+        const data = []
 
         response
-          .on('data', (chunk) => { body.push(chunk) })
-          .on('end', () => { callback(null, JSON.parse(Buffer.concat(body)), response) })
-      } else {
-        callback(Error(`HTTP ${response.statusCode}`), null, response)
-      }
+          .on('data', (chunk) => {
+            data.push(chunk)
+          })
+          .on('end', () => {
+            const result = Buffer.concat(data).toString()
 
-      response.on('error', callback)
+            callback(null, result, response)
+          })
+      } else {
+        const error = Error(`HTTP ${statusCode} ${statusMessage}`)
+
+        callback(error)
+      }
     })
-    .end(data)
+    .end(content)
 }
 
-/**
- * Helps query find my iPhone service
- * @module findme
- * @param {object} config - apple login info
- * @param {string} config.apple_id - email
- * @param {string} config.password - secret
- * @returns {function} - accepts a response handler
- * @example
- * const finder = findme({ apple_id: ***, password: *** })
- */
-const find = (config) => {
-  const settings = Object.assign({}, defaults)
-
-  const id = Object.assign(config, { extended_login: true })
+// Helps query find my iPhone service
+const find = (credentials = {}) => {
+  // Format and store login information
+  const id = Object.assign({}, credentials, { extended_login: true })
   const login = { id: JSON.stringify(id), expires: Date() }
 
-  const pivot = callback => (error, body, response) => {
+  // To store request settings, mutated past login
+  const options = {}
+
+  // An intermediate step required to log in or when cookie expired
+  const pivot = callback => (error, result, response) => {
     if (error) {
       callback(error)
 
       return
     }
 
-    const { findme } = body.webservices
+    const { webservices = {} } = JSON.parse(result)
+    const { findme = {} } = webservices
+    const { status } = findme
 
-    // Break away if findme disabled
-    if (findme.status !== 'active') {
-      callback(Error('findme service disabled'))
+    // Break away if service is turned off
+    if (status !== 'active') {
+      callback(Error('Service disabled'))
 
       return
     }
@@ -78,26 +88,26 @@ const find = (config) => {
 
       login.expires = Date(expires)
 
-      // Cleanup cookie array and update headers
-      settings.headers.Cookie = cookie.map(item => item.substr(0, item.indexOf(';'))).join('; ')
+      // Clean up cookie array before passing back to set respective header
+      options.cookie = cookie.map(item => item.substr(0, item.indexOf(';'))).join('; ')
     }
 
-    // Cleanup webservice url, update request path, hostname
-    settings.hostname = findme.url.replace(':443', '').replace('https://', '')
-    settings.path = '/fmipservice/client/web/initClient'
+    // Clean up web service url, update request path and hostname
+    options.hostname = findme.url.replace(':443', '').replace('https://', '')
+    options.path = '/fmipservice/client/web/initClient'
 
-    // Make the call
-    send({ callback, settings })
+    // Make the call now that login achieved
+    send(options, callback)
   }
 
-  return (callback) => {
+  return (callback = v => v) => {
     // If session within limits
     if (login.expires > Date()) {
       // Go ahead
-      send({ callback, settings })
+      send(options, callback)
     } else {
-      // Login first
-      send({ callback: pivot(callback), data: login.id })
+      // Log in or back again
+      send({ content: login.id }, pivot(callback))
     }
   }
 }
