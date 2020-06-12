@@ -9,9 +9,6 @@ Fetch the latest version from GitHub directly:
 ```sh
 # No side deps
 npm install thewhodidthis/findme
-
-# Try example
-export $(cat .npmrc) && node node_modules/@thewhodidthis/findme/example.js
 ```
 
 ## usage
@@ -21,6 +18,13 @@ Please create an [`.npmrc`](https://docs.npmjs.com/files/npmrc#per-project-confi
 ```npmrc
 APPLE_ID=baz@bar.foo
 PASSWORD=***
+```
+
+That would make it possible to, for example,
+
+```sh
+# Let example know of your login information
+export $(cat .npmrc) && node node_modules/@thewhodidthis/findme/example.js
 ```
 
 In practice, credentials may, of course, be loaded using a CJS module along the lines of:
