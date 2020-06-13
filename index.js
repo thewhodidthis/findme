@@ -56,7 +56,7 @@ const find = (credentials = {}) => {
   const id = Object.assign({}, credentials, { extended_login: true })
   const login = { id: JSON.stringify(id), expires: Date() }
 
-  // To store request settings, mutated past login
+  // Request settings store, mutated past login
   const options = {}
 
   // An intermediate step required to log in or when cookie expired
