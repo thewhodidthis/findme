@@ -1,57 +1,7 @@
-'use strict'
-
-const https = require('https')
-
-// Wraps `https.request()` to post to the API and pass back the response
-const send = (options = {}, callback) => {
-  // Defaults reflect initial login setup
-  const { content, cookie, hostname = 'setup.icloud.com', path = '/setup/ws/1/login' } = options
-  const method = 'POST'
-  const headers = {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Origin': 'https://www.icloud.com'
-  }
-
-  // When credentials are present on initial login
-  if (content) {
-    headers['Content-Length'] = Buffer.byteLength(content)
-  }
-
-  // After successful login
-  if (cookie) {
-    headers['Cookie'] = cookie
-  }
-
-  https
-    .request({ headers, hostname, method, path })
-    .on('error', callback)
-    .on('response', (response) => {
-      const { statusMessage, statusCode } = response
-
-      // Blanket reject all non-OK responses
-      if (statusCode === 200) {
-        const data = []
-
-        response
-          .on('data', (chunk) => {
-            data.push(chunk)
-          })
-          .on('end', () => {
-            const result = Buffer.concat(data).toString()
-
-            callback(null, result, response)
-          })
-      } else {
-        const error = Error(`HTTP ${statusCode} ${statusMessage}`)
-
-        callback(error)
-      }
-    })
-    .end(content)
-}
+import https from 'https'
 
 // Helps query find my iPhone service
-const find = (credentials = {}) => {
+export default function find(credentials = {}) {
   // Format and store login information
   const id = Object.assign({}, credentials, { extended_login: true })
   const login = { id: JSON.stringify(id), expires: Date() }
@@ -112,4 +62,50 @@ const find = (credentials = {}) => {
   }
 }
 
-module.exports = find
+// Wraps `https.request()` to post to the API and pass back the response
+function send(options = {}, callback) {
+  // Defaults reflect initial login setup
+  const { content, cookie, hostname = 'setup.icloud.com', path = '/setup/ws/1/login' } = options
+  const method = 'POST'
+  const headers = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Origin': 'https://www.icloud.com'
+  }
+
+  // When credentials are present on initial login
+  if (content) {
+    headers['Content-Length'] = Buffer.byteLength(content)
+  }
+
+  // After successful login
+  if (cookie) {
+    headers['Cookie'] = cookie
+  }
+
+  https
+    .request({ headers, hostname, method, path })
+    .on('error', callback)
+    .on('response', (response) => {
+      const { statusMessage, statusCode } = response
+
+      // Blanket reject all non-OK responses
+      if (statusCode === 200) {
+        const data = []
+
+        response
+          .on('data', (chunk) => {
+            data.push(chunk)
+          })
+          .on('end', () => {
+            const result = Buffer.concat(data).toString()
+
+            callback(null, result, response)
+          })
+      } else {
+        const error = Error(`HTTP ${statusCode} ${statusMessage}`)
+
+        callback(error)
+      }
+    })
+    .end(content)
+}
