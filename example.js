@@ -1,5 +1,5 @@
 import process from "process"
-import find from "./main.js"
+import finder from "./main.js"
 
 // Credentials sourced from a git-ignored '.npmrc' or 'package.json' config
 // block, or passed in as environment variables
@@ -11,7 +11,7 @@ const {
 } = process.env
 
 // 1. Pass in credentials
-const findme = find({ apple_id, password })
+const findme = finder({ apple_id, password })
 
 // 2. Stage response callback handler
 const run = () =>
