@@ -1,6 +1,6 @@
 ## about
 
-Just another take on the old [sosumi](https://en.wikipedia.org/wiki/Sosumi) class. Tracks device data only. 
+Just another take on the old [sosumi](https://en.wikipedia.org/wiki/Sosumi) class. Tracks device data only.
 
 ## setup
 
@@ -13,7 +13,7 @@ npm install thewhodidthis/findme
 
 ## usage
 
-Please create an [`.npmrc`](https://docs.npmjs.com/files/npmrc#per-project-config-file) with your own `PASSWORD` and `APPLE_ID` information to test or to get the enclosed example working locally. 
+Please create an [`.npmrc`](https://docs.npmjs.com/files/npmrc#per-project-config-file) with your own `PASSWORD` and `APPLE_ID` information to test or to get the enclosed example working locally.
 
 ```npmrc
 # Sample .npmrc
@@ -28,20 +28,21 @@ That would make it possible to, for example,
 export $(cat .npmrc) && node node_modules/@thewhodidthis/findme/example.js
 ```
 
-In practice, credentials may, of course, be loaded using a CJS module along the lines of:
+In practice, credentials may, of course, be loaded using a JS module along the lines of:
 
 ```js
 // Sample 'config.js'
-module.exports = () => ({ apple_id: 'foo@bar', password: '***' })
+exports default () => ({ apple_id: "foo@bar", password: "***" })
 ```
 
 To then be exracting model information for each of your devices for example,
 
 ```js
-// Load credentials
-const config = require('./config')()
-// Import and initialize in one go
-const findme = require('@thewhodidthis/findme')(config)
+import finder from "@thewhodidthis/findme"
+import config from "./config.js"
+
+// Initialize
+const findme = finder(config)
 
 // Issue request
 findme((error, result) => {
