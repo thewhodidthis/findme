@@ -1,18 +1,18 @@
-'use strict'
+import process from 'process'
+import find from './main.js'
 
-// Credentials sourced from a git-ignored
-// '.npmrc' or 'package.json' config block, or
-// passed in as environment variables
+// Credentials sourced from a git-ignored '.npmrc' or 'package.json' config
+// block, or passed in as environment variables
 const {
-  PASSWORD, npm_config_PASSWORD: password = PASSWORD,
-  APPLE_ID, npm_config_APPLE_ID: apple_id = APPLE_ID
+  PASSWORD, npm_config_password: password = PASSWORD,
+  APPLE_ID, npm_config_apple_id: apple_id = APPLE_ID
 } = process.env
 
 // 1. Pass in credentials
-const finder = require('./')({ apple_id, password })
+const findme = find({ apple_id, password })
 
 // 2. Stage response callback handler
-const findme = () => finder((error, result) => {
+const run = () => findme((error, result) => {
   if (error) {
     console.error(error)
     process.exit(1)
@@ -26,7 +26,7 @@ const findme = () => finder((error, result) => {
 })
 
 // 3. Send request
-findme()
+run()
 
 // Try again to check cookie's been properly set
-setTimeout(findme, 30000)
+setTimeout(run, 30000)
