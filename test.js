@@ -1,14 +1,12 @@
-'use strict'
+import process from 'process'
+import { assert, report } from 'tapeless'
+import find from './main.js'
 
 // Using a local '.npmrc' is an easy way of sourcing private keys
-const { npm_config_PASSWORD: password, npm_config_APPLE_ID: apple_id } = process.env
-const findme = require('./')({ apple_id, password })
+const { npm_config_password: password, npm_config_apple_id: apple_id } = process.env
+const { ok, equal, notEqual } = assert
 
-const { ok, equal, doesNotThrow } = require('tapeless')
-
-doesNotThrow
-  .describe('does not throw', 'will proceed sans callback')
-  .test(findme, Error)
+const findme = find({ apple_id, password })
 
 findme((error, result) => {
   equal
@@ -18,5 +16,7 @@ findme((error, result) => {
   const { content = [] } = JSON.parse(result)
 
   ok.test(content.length)
-  equal.test(content[0].msg.statusCode, 200)
+  equal.test(content[0].msg.statusCode, '200')
+
+  report()
 })
