@@ -4,7 +4,7 @@ import find from "./main.js"
 
 // Using a local '.npmrc' is an easy way of sourcing private keys
 const { npm_config_password: password, npm_config_apple_id: apple_id } = process.env
-const { ok, equal, notEqual } = assert
+const { ok, equal } = assert
 
 const findme = find({ apple_id, password })
 
