@@ -15,23 +15,18 @@
   },
   "license": "ISC",
   "author": "Sotiri Bakagiannis <sotirios.bakagiannis@gmail.com> (http://thewhodidthis.com)",
-  "main": "index.js",
+  "type": "module",
+  "exports": "./main.js",
+  "main": "./main.js",
   "scripts": {
     "start": "node example.js",
-    "pretest": "eslint .",
     "test": "node test.js"
   },
-  "eslintConfig": {
-    "extends": "@thewhodidthis"
-  },
-  "dependencies": {},
   "devDependencies": {
-    "@thewhodidthis/eslint-config": "^0.1.5",
-    "eslint": "^7.1.0",
-    "tapeless": "^0.0.10"
+    "tapeless": "^2.0.1"
   },
   "engines": {
-    "node": ">=6.4.0",
-    "npm": ">=3.10.3"
+    "node": ">=14.17.0",
+    "npm": ">=6.14.13"
   }
 }
