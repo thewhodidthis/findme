@@ -23,7 +23,7 @@
     "test": "node test.js"
   },
   "devDependencies": {
-    "tapeless": "^3.0.0"
+    "tapeless": "^4.0.0"
   },
   "engines": {
     "node": ">=14.17.0",
