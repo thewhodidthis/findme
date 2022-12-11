@@ -14,7 +14,7 @@
     "url": "git+https://github.com/thewhodidthis/findme.git"
   },
   "license": "ISC",
-  "author": "Thepersonwhodidthis <thewhodidthis@gmail.com> (http://thewhodidthis.com/)",
+  "author": "Thepersonwhodidthis <thewhodidthis@fastmail.com> (http://thewhodidthis.com/)",
   "type": "module",
   "exports": "./main.js",
   "main": "./main.js",
