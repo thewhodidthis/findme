@@ -1,6 +1,6 @@
 ## about
 
-Just another take on the old [sosumi](https://en.wikipedia.org/wiki/Sosumi) class. Tracks device data only.
+Yet another take on the old [sosumi](https://en.wikipedia.org/wiki/Sosumi) class. Tracks device data only.
 
 ## setup
 
