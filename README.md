@@ -15,7 +15,7 @@ go get github.com/thewhodidthis/findme
 
 Pass in an Apple ID and password to get back a device info probing function that handles extended logins using the `X-APPLE-WEBAUTH-LOGIN` cookie. For example:
 
-```go
+```golang
 finder := findme.Finder(os.Getenv("APPLE_ID"), os.Getenv("PASSWORD"))
 runner := func() {
   buf, err := finder()
