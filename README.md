@@ -21,11 +21,11 @@ runner := func() {
   buf, err := finder()
 
   if err != nil {
-    log.Fatalf("main: unable to complete request: %v", err)
+    log.Fatalf("unable to complete request: %v", err)
   }
 
   if _, err := io.Copy(os.Stdout, buf); err != nil {
-    log.Fatalf("main: unable to read response: %v", err)
+    log.Fatalf("unable to read response: %v", err)
   }
 }
 
