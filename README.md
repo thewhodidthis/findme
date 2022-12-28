@@ -8,54 +8,32 @@ Fetch the latest version from GitHub directly:
 
 ```sh
 # No side deps
-npm install thewhodidthis/findme
+go get github.com/thewhodidthis/findme
 ```
 
 ## usage
 
-Please create an [`.npmrc`](https://docs.npmjs.com/files/npmrc#per-project-config-file) with your own `PASSWORD` and `APPLE_ID` information to test or to get the enclosed example working locally.
+Pass in an Apple ID and password to get back a device info probing function that handles extended logins using the `X-APPLE-WEBAUTH-LOGIN` cookie. For example:
 
-```npmrc
-# Sample .npmrc
-APPLE_ID=baz@bar.foo
-PASSWORD=***
-```
+```go
+finder := findme.Finder(os.Getenv("APPLE_ID"), os.Getenv("PASSWORD"))
+runner := func() {
+  buf, err := finder()
 
-That would make it possible to, for example,
-
-```sh
-# Let example know of your login information
-export $(cat .npmrc) && node node_modules/@thewhodidthis/findme/example.js
-```
-
-In practice, credentials may, of course, be loaded using a JS module along the lines of:
-
-```js
-// Sample 'config.js'
-exports default () => ({ apple_id: "foo@bar", password: "***" })
-```
-
-To then be exracting model information for each of your devices for example,
-
-```js
-import finder from "@thewhodidthis/findme"
-import config from "./config.js"
-
-// Initialize
-const findme = finder(config)
-
-// Issue request
-findme((error, result) => {
-  if (error) {
-    console.error(error)
-  } else {
-    const { content } = JSON.parse(result)
-
-    content.forEach((device) => {
-      console.log(device.deviceModel)
-    })
+  if err != nil {
+    log.Fatalf("main: unable to complete request: %v", err)
   }
-})
+
+  if _, err := io.Copy(os.Stdout, buf); err != nil {
+    log.Fatalf("main: unable to read response: %v", err)
+  }
+}
+
+// Expect a notification to pop up on your device when first logging in.
+runner()
+time.Sleep(5 * time.Second)
+// But skip repeated alerts for a few days until that cookie expires.
+runner()
 ```
 
 ## see also
