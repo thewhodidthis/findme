@@ -29,8 +29,8 @@ runner := func() {
   }
 }
 
-// Expect a notification to pop up on your device when first logging in,
-// but repeated alerts should be skipped for a few days until that cookie expires.
+// Expect a notification to pop up on your device when first logging in, but
+// repeated alerts should be skipped for a few days until that cookie expires.
 runner()
 time.Sleep(5 * time.Second)
 runner()
